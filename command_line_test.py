@@ -2,17 +2,29 @@ class Console:
     def __init__(self):
         self.command = ""
 
+    def sync_test_file(self):
+        print("This is a dummy sync...")
+        print("Syncing finished...")
+
+    def upload_test_file(self):
+        print("This is a dummy sync...")
+        print("Everything is uploaded.")
+
     def reset(self):
         self.command = ""
 
     def get_command(self):
-        self.command = input_get_str("> ")
+        self.command = input_get_str("> ").lower()
 
     def process_command(self):
         if self.command == "m":
             print_menu()
         elif self.command == "h":
             print_start_message()
+        elif self.command == "s":
+            self.sync_test_file()
+        elif self.command == "u":
+            self.upload_test_file()
         elif self.command == "r":
             pass
         elif self.command == "q":
@@ -44,6 +56,8 @@ def print_start_message():
 
 def print_menu():
     menu = ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+            "u - upload\n"
+            "s - sync\n"
             "m - menu\n"
             "h - help\n"
             "r - reset\n"
