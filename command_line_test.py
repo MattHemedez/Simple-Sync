@@ -1,13 +1,17 @@
+from synchronizer import Synchronizer
+
+
 class Console:
     def __init__(self):
         self.command = ""
+        self.syncer = Synchronizer()
 
     def sync_test_file(self):
-        print("This is a dummy sync...")
+        self.syncer.download()
         print("Syncing finished...")
 
     def upload_test_file(self):
-        print("This is a dummy sync...")
+        self.syncer.upload()
         print("Everything is uploaded.")
 
     def reset(self):
