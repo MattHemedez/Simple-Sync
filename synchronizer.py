@@ -80,8 +80,6 @@ class GoogleDriveApiHandler:
 
         return result
 
-    def download_files
-
 
 if __name__ == "__main__":
     myGoogleApiHandler = GoogleDriveApiHandler()
