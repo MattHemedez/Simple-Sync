@@ -1,14 +1,15 @@
 import pickle
 import os.path
+import io
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.http import MediaIoBaseDownload
 from googleapiclient.http import MediaFileUpload
-import io
-import json
+from pathlib import Path
 
 SCOPES = ["https://www.googleapis.com/auth/drive.appdata", "https://www.googleapis.com/auth/drive.file"]
+FILES_DIR = Path("files/")
 
 
 class Synchronizer:
@@ -20,6 +21,7 @@ class Synchronizer:
         Upload a single folder with files. Cannot be larger than
         remaining Google Drive space. Cannot go through more folders.
         """
+
         pass
 
     def download(self):
@@ -88,7 +90,17 @@ class GoogleDriveApiHandler:
 
         return result
 
-    def download_file(self, file_id: str, file_name="WillFillInLater.txt"):
+    def get_file_id_if_exists(self, file_name: str) -> str:
+        query = "name='" + file_name + "'"
+        response = self.service.files().list(spaces='appDataFolder',
+                                             fields="files(id)",
+                                             q=query).execute()
+        result = response.get("files", None)
+        if result is None:
+            return result
+        return result[0]["id"]
+
+    def download_file(self, file_id: str, file_name: str):
         request = self.service.files().get_media(fileId=file_id)
         fh = io.BytesIO()
         downloader = MediaIoBaseDownload(fh, request)
@@ -101,17 +113,31 @@ class GoogleDriveApiHandler:
 
         return True
 
-    def upload_file(self, file_name):
+    def download_all_files(self):
+        file_dict = self.get_info_on_files()
+        for file_id, file_info in file_dict.items():
+            self.download_file(file_id, file_info["name"])
+
+    def upload_file(self, file_path):
+        file_name = Path(file_path).name
+        file_id = self.get_file_id_if_exists(file_name)
+
         file_metadata = {
             "name": file_name,
             "parents": ["appDataFolder"]
         }
-        media = MediaFileUpload(file_name,
+
+        media = MediaFileUpload(file_path,
                                 resumable=True)
-        file = self.service.files().create(body=file_metadata,
-                                           media_body=media,
-                                           fields='id').execute()
-        print('File ID: %s' % file.get('id'))
+        if file_id is None:
+            file = self.service.files().create(body=file_metadata,
+                                               media_body=media,
+                                               fields='id').execute()
+        else:
+            file = self.service.files().update(fileId=file_id,
+                                               media_body=media,
+                                               fields='id').execute()
+        # print('File ID: %s' % file.get('id'))
 
     def delete_file(self, file_id):
         response = self.service.files().delete(fileId=file_id).execute()
@@ -131,8 +157,8 @@ class GoogleDriveApiHandler:
 
 if __name__ == "__main__":
     testApi = GoogleDriveApiHandler()
-    testApi.download_file("1qq7htfwuIici11K1i793p7G8GhM0HW7yEkX_H-maVa4GYug6YA", "test5.txt")
-    # testApi.upload_file("test.txt")
+    # testApi.download_file("1AsKvzyKkqhQNaugGD32Xks5UgdsBi8q_thi00knvEvpAtxG9qg", str(FILES_DIR / "test5.txt"))
+    # testApi.upload_file(str(FILES_DIR / "test.txt"))
     # testApi.reset_all_files()
     # testApi.delete_file("1p5FjF1imMqoSqBR5PD0xlIT10P8ffMRm3vzDFUAoHf04DFRNwA")
 
