@@ -88,14 +88,17 @@ class GoogleDriveApiHandler:
 
         return result
 
-    def get_file(self, file_ID: str, file_name: str):
-        request = self.service.files().get_media(fileId="1mPuQUmR3Pyz9Ews1qI4zenJ-JRvifTrP")
+    def download_file(self, file_id: str, file_name="WillFillInLater.txt"):
+        request = self.service.files().get_media(fileId=file_id)
         fh = io.BytesIO()
         downloader = MediaIoBaseDownload(fh, request)
         done = False
         while done is False:
             status, done = downloader.next_chunk()
             print("Download %d%%." % int(status.progress() * 100))
+        with open(file_name, "wb") as out:
+            out.write(fh.getvalue())
+
         return True
 
     def upload_file(self, file_name):
@@ -124,14 +127,14 @@ class GoogleDriveApiHandler:
             print(file_id, ":")
             print("\tmd5 Checksum: \t", file_info["md5"])
             print("\tFile_Name: \t\t", file_info["name"])
-            print("\tDownload Link: \t\t", file_info["d_link"])
 
 
 if __name__ == "__main__":
     testApi = GoogleDriveApiHandler()
-    # testApi.upload_file("test1.txt")
+    testApi.download_file("1qq7htfwuIici11K1i793p7G8GhM0HW7yEkX_H-maVa4GYug6YA", "test5.txt")
+    # testApi.upload_file("test.txt")
     # testApi.reset_all_files()
-    #testApi.delete_file("1p5FjF1imMqoSqBR5PD0xlIT10P8ffMRm3vzDFUAoHf04DFRNwA")
+    # testApi.delete_file("1p5FjF1imMqoSqBR5PD0xlIT10P8ffMRm3vzDFUAoHf04DFRNwA")
 
     testApi.print_file_id_list()
     # testApi.get_file("https://drive.google.com/uc?id=1mPuQUmR3Pyz9Ews1qI4zenJ-JRvifTrP&export=download", "test1.txt")
