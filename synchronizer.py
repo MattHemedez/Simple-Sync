@@ -3,9 +3,11 @@ import os.path
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+from googleapiclient.http import MediaIoBaseDownload
+from googleapiclient.http import MediaFileUpload
+import io
 
-
-SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly']
+SCOPES = ["https://www.googleapis.com/auth/drive.appdata", "https://www.googleapis.com/auth/drive.file"]
 
 
 class Synchronizer:
@@ -71,16 +73,67 @@ class GoogleDriveApiHandler:
                 pickle.dump(self.creds, token)
 
     def get_info_on_files(self):
-        temp = self.service.files().list(corpora="user", orderBy="name",
-                                         q="mimeType != 'application/vnd.google-apps.folder'",
-                                         fields="files(name, md5Checksum)").execute()
+        response = self.service.files().list(spaces='appDataFolder',
+                                             orderBy="name",
+                                             fields='files(id, name, md5Checksum, webContentLink)',
+                                             ).execute()
+
+        # files_dict = self.service.files().list(corpora="user", orderBy="name",
+        #                                 q="mimeType != 'application/vnd.google-apps.folder'",
+        #                                 fields="files(name, md5Checksum, id, webContentLink)").execute()
         result = {}
-        for file_info in temp["files"]:
-            result[file_info["name"]] = file_info.get("md5Checksum", None)
+        for file_info in response["files"]:
+            result[file_info["name"]] = {"md5": file_info.get("md5Checksum", None),
+                                         "file_id": file_info["id"],
+                                         "d_link": file_info.get("webContentLink", None)}
 
         return result
 
+    def get_file(self, file_ID: str, file_name: str):
+        request = self.service.files().get_media(fileId="1mPuQUmR3Pyz9Ews1qI4zenJ-JRvifTrP")
+        fh = io.BytesIO()
+        downloader = MediaIoBaseDownload(fh, request)
+        done = False
+        while done is False:
+            status, done = downloader.next_chunk()
+            print("Download %d%%." % int(status.progress() * 100))
+        return True
+
+    def upload_file(self, file_name):
+        file_metadata = {
+            "name": file_name,
+            "parents": ["appDataFolder"]
+        }
+        media = MediaFileUpload(file_name,
+                                resumable=True)
+        file = self.service.files().create(body=file_metadata,
+                                           media_body=media,
+                                           fields='id').execute()
+        print('File ID: %s' % file.get('id'))
+
+    def delete_file(self, file_id):
+        pass
+
+    def print_file_id_list(self):
+        file_list = self.get_info_on_files()
+        for file_name, file_info in file_list.items():
+            print(file_name, ":")
+            print("\tmd5 Checksum: \t", file_info["md5"])
+            print("\tFile ID: \t\t", file_info["file_id"])
+            print("\tDownload Link: \t\t", file_info["d_link"])
+
 
 if __name__ == "__main__":
-    myGoogleApiHandler = GoogleDriveApiHandler()
-    myGoogleApiHandler.get_files()
+    testApi = GoogleDriveApiHandler()
+    # testApi.upload_file("test.txt")
+
+    # """
+    # Determine Files in appdata
+    file_dict = testApi.get_info_on_files()
+    for file_name, file_data in file_dict.items():
+        print(file_name)
+        for key, element in file_data.items():
+            print("\t", key, ":", element)
+    # """
+    # testApi.get_file("https://drive.google.com/uc?id=1mPuQUmR3Pyz9Ews1qI4zenJ-JRvifTrP&export=download", "test1.txt")
+
