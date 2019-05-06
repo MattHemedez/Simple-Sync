@@ -6,6 +6,7 @@ from google.auth.transport.requests import Request
 from googleapiclient.http import MediaIoBaseDownload
 from googleapiclient.http import MediaFileUpload
 import io
+import json
 
 SCOPES = ["https://www.googleapis.com/auth/drive.appdata", "https://www.googleapis.com/auth/drive.file"]
 
@@ -75,17 +76,15 @@ class GoogleDriveApiHandler:
     def get_info_on_files(self):
         response = self.service.files().list(spaces='appDataFolder',
                                              orderBy="name",
-                                             fields='files(id, name, md5Checksum, webContentLink)',
+                                             fields='files(id, name, md5Checksum, trashed)',
+                                             q="mimeType != 'application/vnd.google-apps.folder'"
                                              ).execute()
 
-        # files_dict = self.service.files().list(corpora="user", orderBy="name",
-        #                                 q="mimeType != 'application/vnd.google-apps.folder'",
-        #                                 fields="files(name, md5Checksum, id, webContentLink)").execute()
         result = {}
         for file_info in response["files"]:
-            result[file_info["name"]] = {"md5": file_info.get("md5Checksum", None),
-                                         "file_id": file_info["id"],
-                                         "d_link": file_info.get("webContentLink", None)}
+            result[file_info["id"]] = {"md5": file_info.get("md5Checksum", None),
+                                         "name": file_info["name"],
+                                         "trashed": file_info["trashed"]}
 
         return result
 
@@ -112,28 +111,28 @@ class GoogleDriveApiHandler:
         print('File ID: %s' % file.get('id'))
 
     def delete_file(self, file_id):
-        pass
+        response = self.service.files().delete(fileId=file_id).execute()
+
+    def reset_all_files(self):
+        file_dict = self.get_info_on_files()
+        for file_id in file_dict.keys():
+            self.delete_file(file_id)
 
     def print_file_id_list(self):
         file_list = self.get_info_on_files()
-        for file_name, file_info in file_list.items():
-            print(file_name, ":")
+        for file_id, file_info in file_list.items():
+            print(file_id, ":")
             print("\tmd5 Checksum: \t", file_info["md5"])
-            print("\tFile ID: \t\t", file_info["file_id"])
+            print("\tFile_Name: \t\t", file_info["name"])
             print("\tDownload Link: \t\t", file_info["d_link"])
 
 
 if __name__ == "__main__":
     testApi = GoogleDriveApiHandler()
-    # testApi.upload_file("test.txt")
+    # testApi.upload_file("test1.txt")
+    # testApi.reset_all_files()
+    #testApi.delete_file("1p5FjF1imMqoSqBR5PD0xlIT10P8ffMRm3vzDFUAoHf04DFRNwA")
 
-    # """
-    # Determine Files in appdata
-    file_dict = testApi.get_info_on_files()
-    for file_name, file_data in file_dict.items():
-        print(file_name)
-        for key, element in file_data.items():
-            print("\t", key, ":", element)
-    # """
+    testApi.print_file_id_list()
     # testApi.get_file("https://drive.google.com/uc?id=1mPuQUmR3Pyz9Ews1qI4zenJ-JRvifTrP&export=download", "test1.txt")
 
