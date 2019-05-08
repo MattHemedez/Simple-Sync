@@ -14,26 +14,33 @@ class Console:
         self.syncer.upload()
         print("Everything is uploaded.")
 
-    def reset(self):
-        self.command = ""
+    def reset_drive(self):
+        self.syncer.reset_drive()
 
     def get_command(self):
         self.command = input_get_str("> ").lower()
 
+    def list_files(self):
+        file_names_list = self.syncer.get_drive_file_names()
+        for i, file_name in enumerate(file_names_list, start=1):
+            print(i, ":", file_name)
+
     def process_command(self):
-        if self.command == "m":
+        if self.command == "h":
             print_menu()
-        elif self.command == "h":
-            print_start_message()
         elif self.command == "s":
             self.sync_test_file()
         elif self.command == "u":
             self.upload_test_file()
         elif self.command == "r":
-            pass
+            self.reset_drive()
+        elif self.command == "l":
+            self.list_files()
         elif self.command == "q":
             # Handled in outer function
             pass
+        else:
+            print("Command does not exist...")
 
     def run_command_prompt(self):
         print_start_message()
@@ -55,17 +62,17 @@ def input_get_str(prompt: str) -> str:
 
 
 def print_start_message():
-    print("Type m for a list of commands...")
+    print("Type h for a list of commands...")
 
 
 def print_menu():
     menu = ("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-            "u - upload\n"
-            "s - sync\n"
-            "m - menu\n"
-            "h - help\n"
-            "r - reset\n"
-            "q - quit\n"
+            "u - uploads all files in sync folder\n"
+            "s - Downloads all files in drive\n"
+            "h - displays this menu\n"
+            "r - deletes all files in drive\n"
+            "l - lists all files in drive\n"
+            "q - exits menu\n"
             "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print(menu)
 

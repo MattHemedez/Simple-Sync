@@ -14,39 +14,79 @@ FILES_DIR = Path("files/")
 
 class Synchronizer:
     def __init__(self):
-        pass
+        self.drive_api = GoogleDriveApiHandler()
 
     def upload(self):
         """
         Upload a single folder with files. Cannot be larger than
         remaining Google Drive space. Cannot go through more folders.
+        Deletes all files in Google Drive that don't have file names in
+        file folder.
         """
 
-        pass
+        paths_of_files = [str(file_path_obj) for file_path_obj in FILES_DIR.iterdir()]
+        names_of_files = [file_path_obj.name for file_path_obj in FILES_DIR.iterdir()]
+
+        for file_path in paths_of_files:
+            self.drive_api.upload_file(file_path)
+
+        files_dict = self.drive_api.get_info_on_files()
+
+        for file_id, file_info in files_dict.items():
+            if file_info["name"] not in names_of_files:
+                self.drive_api.delete_file(file_id)
 
     def download(self):
         """
-        Download folder reserved for single sync.
+        Download files from Google Drive into files folder.
+        Delete all files not found in Google Drive folder.
         """
-        pass
+        names_of_files_local = [file_path_obj.name for file_path_obj in FILES_DIR.iterdir()]
 
-    def get_drive_file_names_in_dir(self, dir_name):
-        pass
+        files_dict = self.drive_api.get_info_on_files()
+
+        names_of_files_drive = []
+        for file_id, file_info in files_dict.items():
+            names_of_files_drive.append(file_info["name"])
+            file_path = str(FILES_DIR / file_info["name"])
+            self.drive_api.download_file(file_id, file_path)
+
+        for file_name_local in names_of_files_local:
+            if file_name_local not in names_of_files_drive:
+                self.delete_file_computer(file_name_local)
+
+    def get_drive_file_names(self):
+        file_dict = self.drive_api.get_info_on_files()
+        return [file_info["name"] for file_info in file_dict.values()]
 
     def does_drive_file_exist(self, file_name):
+        if self.drive_api.get_file_id_if_exists() is None:
+            return False
+        return True
+
+    def delete_file_drive(self, file_name):
         pass
 
-    def delete_drive_file(self, file_name):
+    def delete_file_computer(self, file_name):
+        print("Deleting File:" + file_name)
+        file_path = FILES_DIR / file_name
+        file_path.unlink()
+        return True
+
+    def delete_file_both(self, file_name):
         pass
 
-    def upload_drive_file(self, file_name):
-        pass
+    def reset_drive(self):
+        self.drive_api.reset_all_files()
 
-    def delete_file(self, file_name):
-        pass
+    def upload_file(self, file_name):
+        file_path = str(FILES_DIR / file_name)
+        self.drive_api.upload_file(file_path)
 
     def download_file(self, file_name):
-        pass
+        file_id = self.drive_api.get_file_id_if_exists(file_name)
+        file_path = str(FILES_DIR / file_name)
+        self.drive_api.download_file(file_id, file_path)
 
 
 class GoogleDriveApiHandler:
@@ -96,11 +136,12 @@ class GoogleDriveApiHandler:
                                              fields="files(id)",
                                              q=query).execute()
         result = response.get("files", None)
-        if result is None:
-            return result
+        if len(result) == 0:
+            return None
         return result[0]["id"]
 
-    def download_file(self, file_id: str, file_name: str):
+    def download_file(self, file_id: str, file_path: str):
+        file_name = Path(file_path).name
         request = self.service.files().get_media(fileId=file_id)
         fh = io.BytesIO()
         downloader = MediaIoBaseDownload(fh, request)
@@ -108,7 +149,7 @@ class GoogleDriveApiHandler:
         while done is False:
             status, done = downloader.next_chunk()
             print("Download %d%%." % int(status.progress() * 100))
-        with open(file_name, "wb") as out:
+        with open(file_path, "wb") as out:
             out.write(fh.getvalue())
 
         return True
