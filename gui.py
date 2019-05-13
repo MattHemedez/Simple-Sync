@@ -4,14 +4,10 @@ from synchronizer import Synchronizer
 
 
 # Init
-
-
 syncer = Synchronizer()
 
 
 # Helper Functions
-
-
 def upload_button():
     syncer.upload()
 
@@ -21,17 +17,14 @@ def download_button():
 
 
 # Root Configuration
-
 root = Tk()
 root.title = "Simple Sync"
 
 # Main Window Configuration
-
 mainframe = ttk.Frame(root, padding="0 0 0 0")
 mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
 
 # Re-drawable Configuration
-
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
 
