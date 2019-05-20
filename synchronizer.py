@@ -128,6 +128,12 @@ class Synchronizer:
         file_path = str(self.dir_path / file_name)
         self.drive_api.download_file(file_id, file_path)
 
+    def upload_clipboard(self):
+        pass
+
+    def download_clipboard(self):
+        pass
+
 
 class GoogleDriveApiHandler:
     def __init__(self):
@@ -301,4 +307,3 @@ if __name__ == "__main__":
 
     testApi.print_file_id_list()
     # testApi.get_file("https://drive.google.com/uc?id=1mPuQUmR3Pyz9Ews1qI4zenJ-JRvifTrP&export=download", "test1.txt")
-
