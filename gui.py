@@ -6,6 +6,7 @@ from time import ctime
 from os import startfile
 
 FILE_DIR = Path("files/")
+IMG_DIR = Path("res/")
 
 
 # Init
@@ -45,7 +46,8 @@ def refresh_file_view(tree_view: ttk.Treeview):
 
 # Root Configuration
 root = Tk()
-root.title = "Simple Sync"
+root.title("Simple Sync")
+root.iconbitmap(IMG_DIR / "simple_sync.ico")
 
 # Main Window Configuration
 mainframe = ttk.Frame(root, padding="0 0 0 0")
@@ -75,7 +77,7 @@ for column in columns_to_display:
 file_view.column(column="#0", anchor="w", stretch=True)
 file_view.heading("#0", anchor="w", text="File Name")
 file_view.grid(columnspan=2, sticky=(N, W, E, S))
-file_view.tag_configure("file", background="yellow")
+file_view.tag_configure("file", background="#72DDF7")
 file_view.tag_bind("file", "<Double-Button-1>", on_file_double_click)  # the item clicked can be found via tree.focus()
 
 ttk.Button(mainframe, style="UploadButton.TButton", text="Upload", command=upload_button).grid(column=0, row=1, sticky=(N, W, E, S))
