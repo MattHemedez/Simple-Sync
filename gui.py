@@ -44,10 +44,10 @@ class SimplySyncGui:
         self.sync_dir = Path(self.conf_handler.get_conf_entry("file_dir_path"))
         self.refresh_file_view()
 
-    def upload_button(self):
+    def on_upload_button_click(self):
         self.sync_handler.upload()
 
-    def download_button(self):
+    def on_download_button_click(self):
         self.sync_handler.download()
 
     def on_file_double_click(self):
@@ -108,11 +108,11 @@ class SimplySyncGui:
         ttk.Button(self.mainframe,
                    style="UploadButton.TButton",
                    text="Upload",
-                   command=self.upload_button).grid(column=0, row=1, sticky=(N, W, E, S))
+                   command=self.on_upload_button_click).grid(column=0, row=1, sticky=(N, W, E, S))
         ttk.Button(self.mainframe,
                    style="DownloadButton.TButton",
                    text="Download",
-                   command=self.download_button).grid(column=1, row=1, sticky=(N, W, E, S))
+                   command=self.on_download_button_click).grid(column=1, row=1, sticky=(N, W, E, S))
 
         self.settings_menu.add_command(label="Change Syncing Folder Path", command=self.change_file_folder_path)
 
