@@ -1,17 +1,21 @@
 from tkinter import *
 from tkinter import ttk
 from synchronizer import Synchronizer
+from configure_file_handler import ConfigurationHandler
 from pathlib import Path
 from time import ctime
 from os import startfile
 
-FILE_DIR = Path("files/")
-IMG_DIR = Path("res/")
-
 
 # Init
-# syncer = Synchronizer()
-syncer = "Testing. Delete this when done."
+configuration_handler = ConfigurationHandler()
+syncer = Synchronizer(configuration_handler.get_conf_entry("file_dir_path"))
+# syncer = "Testing. Delete this when done."
+
+
+# Constants
+FILE_DIR = Path(configuration_handler.get_conf_entry("file_dir_path"))
+IMG_DIR = Path("res/")
 
 
 # Helper Functions

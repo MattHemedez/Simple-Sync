@@ -12,13 +12,16 @@ SCOPES = ["https://www.googleapis.com/auth/drive.appdata", "https://www.googleap
 
 
 class Synchronizer:
-    def __init__(self, file_dir_path="files/"):
+    def __init__(self, file_dir_path: str):
         """
         Initialize Google Drive API handler. Determine folder to be used for file syncing features.
 
         :param folder_path: str representing path to the directory containing files to be synced.
         """
         self.drive_api = GoogleDriveApiHandler()
+        self.dir_path = Path(file_dir_path)
+
+    def set_file_dir_path(self, file_dir_path):
         self.dir_path = Path(file_dir_path)
 
     def upload(self):
