@@ -22,10 +22,10 @@ class SimplySyncGui:
         self.sync_handler = Synchronizer(self.conf_handler.get_conf_entry("file_dir_path"))
         # self.sync_handler = "Testing. Delete this when done."
 
-        self.sync_dir = Path(self.conf_handler.get_conf_entry("file_dir_path"))
-
         # Gui Elements
         self.root = Tk()
+        self.sync_dir = StringVar()
+        self.sync_dir.set(Path(self.conf_handler.get_conf_entry("file_dir_path")).resolve())
         self.mainframe = ttk.Frame(self.root, padding="0 0 0 0")
         self.file_view = None
         self.menu_bar = Menu(self.root)
@@ -39,16 +39,20 @@ class SimplySyncGui:
 
     def change_file_folder_path(self):
         new_dir = filedialog.askdirectory()
-        self.conf_handler.change_conf_entry("file_dir_path", new_dir)
-        self.conf_handler.save_conf()
-        self.sync_dir = Path(self.conf_handler.get_conf_entry("file_dir_path"))
-        self.refresh_file_view()
+        if new_dir != "":
+            self.conf_handler.change_conf_entry("file_dir_path", new_dir)
+            self.conf_handler.save_conf()
+            self.sync_dir.set(Path(self.conf_handler.get_conf_entry("file_dir_path")).resolve())
+            self.refresh_file_view()
+            self.sync_handler.set_file_dir_path(self.conf_handler.get_conf_entry("file_dir_path"))
 
     def on_upload_button_click(self):
         self.sync_handler.upload()
+        self.refresh_file_view()
 
     def on_download_button_click(self):
         self.sync_handler.download()
+        self.refresh_file_view()
 
     def on_file_double_click(self):
         selected_file = self.file_view.focus()
@@ -56,7 +60,7 @@ class SimplySyncGui:
 
     def refresh_file_view(self):
         self.file_view.delete(*self.file_view.get_children())
-        for file_path in self.sync_dir.iterdir():
+        for file_path in Path(self.sync_dir.get()).iterdir():
             file_name = file_path.name
             self.file_view.insert("", "end", file_name,
                                   tags=("file"),
@@ -68,20 +72,21 @@ class SimplySyncGui:
 
     def init_gui_elements(self):
         # Root Configuration
-        self.root.title("Simple Sync")
-        self.root.iconbitmap(IMG_DIR / "simple_sync.ico")
+        self.root.title("Simply Sync")
+        self.root.iconbitmap(IMG_DIR / "simply_sync.ico")
 
         # Main Window Configuration
         self.mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
 
-        # Re-drawable Configuration
+        # Grid Configuration
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
 
         self.mainframe.columnconfigure(0, weight=1)
         self.mainframe.columnconfigure(1, weight=1)
-        self.mainframe.rowconfigure(0, weight=2)
-        self.mainframe.rowconfigure(1, weight=1)
+        self.mainframe.rowconfigure(0, weight=0)
+        self.mainframe.rowconfigure(1, weight=2)
+        self.mainframe.rowconfigure(2, weight=1)
 
         # Style Section
         ttk.Style().configure("UploadButton.TButton", relief="flat", background="#72DDF7")
@@ -101,23 +106,25 @@ class SimplySyncGui:
             self.file_view.heading(column, anchor="w", text=column)
         self.file_view.column(column="#0", anchor="w", stretch=True)
         self.file_view.heading("#0", anchor="w", text="File Name")
-        self.file_view.grid(columnspan=2, sticky=(N, W, E, S))
+        self.file_view.grid(row=1, columnspan=2, sticky=(N, W, E, S))
         self.file_view.tag_configure("file", background="#72DDF7")
         self.file_view.tag_bind("file", "<Double-Button-1>", self.on_file_double_click)
 
         ttk.Button(self.mainframe,
                    style="UploadButton.TButton",
                    text="Upload",
-                   command=self.on_upload_button_click).grid(column=0, row=1, sticky=(N, W, E, S))
+                   command=self.on_upload_button_click).grid(column=0, row=2, sticky=(N, W, E, S))
         ttk.Button(self.mainframe,
                    style="DownloadButton.TButton",
                    text="Download",
-                   command=self.on_download_button_click).grid(column=1, row=1, sticky=(N, W, E, S))
+                   command=self.on_download_button_click).grid(column=1, row=2, sticky=(N, W, E, S))
 
         self.settings_menu.add_command(label="Change Syncing Folder Path", command=self.change_file_folder_path)
 
         self.menu_bar.add_cascade(label="Settings", menu=self.settings_menu)
         self.root.config(menu=self.menu_bar)
+
+        ttk.Label(self.mainframe, textvariable=self.sync_dir).grid(column=0, row=0, sticky=(N, W, E, S))
 
 
 if __name__ == "__main__":
