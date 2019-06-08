@@ -30,8 +30,8 @@ class SimplySyncGui:
         self.root = Tk()
 
         # Images
-        self.img_reload_button = path_str_to_photo_image("res/reload.png")
-        self.img_settings_button = path_str_to_photo_image("res/settings.png")
+        self.img_reload_btn = path_str_to_photo_image("res/reload.png")
+        self.img_settings_btn = path_str_to_photo_image("res/settings.png")
         self.img_logo = path_str_to_photo_image("res/512x512.png")
 
         # Gui Elements
@@ -39,8 +39,6 @@ class SimplySyncGui:
         self.sync_dir.set(Path(self.conf_handler.get_conf_entry("file_dir_path")).resolve())
         self.mainframe = ttk.Frame(self.root, padding="0 0 0 0")
         self.file_view = None
-        # self.menu_bar = Menu(self.root)
-        # self.settings_menu = Menu(self.menu_bar, tearoff=0)
         self.init_gui_elements()
 
         self.refresh_file_view()
@@ -57,11 +55,11 @@ class SimplySyncGui:
             self.refresh_file_view()
             self.sync_handler.set_file_dir_path(self.conf_handler.get_conf_entry("file_dir_path"))
 
-    def on_upload_button_click(self):
+    def on_upload_btn_click(self):
         self.sync_handler.upload()
         self.refresh_file_view()
 
-    def on_download_button_click(self):
+    def on_download_btn_click(self):
         self.sync_handler.download()
         self.refresh_file_view()
 
@@ -132,27 +130,22 @@ class SimplySyncGui:
         ttk.Button(self.mainframe,
                    style="UploadButton.TButton",
                    text="Upload",
-                   command=self.on_upload_button_click).grid(column=0, row=2, sticky=(N, W, E, S))
+                   command=self.on_upload_btn_click).grid(column=0, row=2, sticky=(N, W, E, S))
         ttk.Button(self.mainframe,
                    style="DownloadButton.TButton",
                    text="Download",
-                   command=self.on_download_button_click).grid(column=1, row=2, sticky=(N, W, E, S))
+                   command=self.on_download_btn_click).grid(column=1, row=2, sticky=(N, W, E, S))
 
         settings_btn_frame = Frame(self.mainframe, height=16, width=28)
         settings_btn_frame.grid(column=1, row=0, sticky=(E, N, S))
 
         ttk.Button(settings_btn_frame,
-                   image=self.img_settings_button,
+                   image=self.img_settings_btn,
                    command=self.change_file_folder_path).grid(column=0, row=0, sticky=(N, W, E, S))
 
         ttk.Button(settings_btn_frame,
-                   image=self.img_reload_button,
+                   image=self.img_reload_btn,
                    command=self.refresh_file_view).grid(column=1, row=0, sticky=(N, W, E, S))
-
-        # self.settings_menu.add_command(label="Change Syncing Folder Path", command=self.change_file_folder_path)
-
-        # self.menu_bar.add_cascade(label="Settings", menu=self.settings_menu)
-        # self.root.config(menu=self.menu_bar)
 
         ttk.Label(self.mainframe, textvariable=self.sync_dir).grid(column=0, row=0, sticky=(N, W, E, S))
 
