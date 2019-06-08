@@ -1,11 +1,11 @@
 from tkinter import *
-from tkinter import ttk
-from tkinter import filedialog
-from synchronizer import Synchronizer
+from tkinter import ttk, filedialog
+# from PIL import ImageTk, Image as PIL_Image
 from configure_file_handler import ConfigurationHandler
 from pathlib import Path
 from time import ctime
 from os import startfile
+from synchronizer import Synchronizer
 
 
 IMG_DIR = Path("res/")
@@ -16,14 +16,26 @@ def convert_b_to_kb_str(num: int):
     return str(round(num / 1000.0)) + " KB"
 
 
+def path_str_to_photo_image(path_str: str):
+    path_str = Path(path_str).resolve()
+    photo_img = PhotoImage(file=path_str)
+    return photo_img
+
+
 class SimplySyncGui:
     def __init__(self):
         self.conf_handler = ConfigurationHandler()
         self.sync_handler = Synchronizer(self.conf_handler.get_conf_entry("file_dir_path"))
         # self.sync_handler = "Testing. Delete this when done."
 
-        # Gui Elements
         self.root = Tk()
+
+        # Images
+        self.img_reload_button = path_str_to_photo_image("res/reload.png")
+        self.img_settings_button = path_str_to_photo_image("res/settings.png")
+        self.img_logo = path_str_to_photo_image("res/512x512.png")
+
+        # Gui Elements
         self.sync_dir = StringVar()
         self.sync_dir.set(Path(self.conf_handler.get_conf_entry("file_dir_path")).resolve())
         self.mainframe = ttk.Frame(self.root, padding="0 0 0 0")
@@ -118,6 +130,17 @@ class SimplySyncGui:
                    style="DownloadButton.TButton",
                    text="Download",
                    command=self.on_download_button_click).grid(column=1, row=2, sticky=(N, W, E, S))
+
+        settings_btn_frame = Frame(self.mainframe, height=16, width=28)
+        settings_btn_frame.grid(column=1, row=0, sticky=(E, N, S))
+
+        ttk.Button(settings_btn_frame,
+                   image=self.img_settings_button,
+                   command=self.change_file_folder_path).grid(column=0, row=0, sticky=(N, W, E, S))
+
+        ttk.Button(settings_btn_frame,
+                   image=self.img_reload_button,
+                   command=self.refresh_file_view).grid(column=1, row=0, sticky=(N, W, E, S))
 
         self.settings_menu.add_command(label="Change Syncing Folder Path", command=self.change_file_folder_path)
 
