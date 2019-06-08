@@ -1,6 +1,5 @@
 from tkinter import *
 from tkinter import ttk, filedialog
-# from PIL import ImageTk, Image as PIL_Image
 from configure_file_handler import ConfigurationHandler
 from pathlib import Path
 from time import ctime
@@ -105,21 +104,29 @@ class SimplySyncGui:
         ttk.Style().configure("DownloadButton.TButton", relief="flat", background="#C33C54")
 
         # tk Objects Initialization
+        file_view_frame = Frame(self.mainframe)
+        file_view_frame.grid(row=1, columnspan=2, sticky=(N, W, E, S), padx=2, pady=2)
+
+        vsb = ttk.Scrollbar(file_view_frame)
+        vsb.pack(side="right", fill="y")
+
         all_columns = ("Type", "Date modified", "Size", "Path")
         columns_to_display = all_columns[0:3]
-        self.file_view = ttk.Treeview(self.mainframe,
+        self.file_view = ttk.Treeview(file_view_frame,
                                       columns=columns_to_display,
                                       height=10,
                                       displaycolumns=columns_to_display,
                                       padding=[3, 3, 3, 3],
-                                      selectmode="extended")
+                                      selectmode="extended",
+                                      yscrollcommand=vsb.set)
+        vsb.config(command=self.file_view.yview)
         for column in columns_to_display:
             self.file_view.column(column=column, anchor="w", stretch=True)
             self.file_view.heading(column, anchor="w", text=column)
         self.file_view.column(column="#0", anchor="w", stretch=True)
         self.file_view.heading("#0", anchor="w", text="File Name")
-        self.file_view.grid(row=1, columnspan=2, sticky=(N, W, E, S))
-        self.file_view.tag_configure("file", background="#72DDF7")
+        self.file_view.pack(side="left", fill="both")
+        self.file_view.tag_configure("file", background="#98FB98")
         self.file_view.tag_bind("file", "<Double-Button-1>", self.on_file_double_click)
 
         ttk.Button(self.mainframe,
