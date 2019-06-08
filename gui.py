@@ -39,8 +39,8 @@ class SimplySyncGui:
         self.sync_dir.set(Path(self.conf_handler.get_conf_entry("file_dir_path")).resolve())
         self.mainframe = ttk.Frame(self.root, padding="0 0 0 0")
         self.file_view = None
-        self.menu_bar = Menu(self.root)
-        self.settings_menu = Menu(self.menu_bar, tearoff=0)
+        # self.menu_bar = Menu(self.root)
+        # self.settings_menu = Menu(self.menu_bar, tearoff=0)
         self.init_gui_elements()
 
         self.refresh_file_view()
@@ -149,10 +149,10 @@ class SimplySyncGui:
                    image=self.img_reload_button,
                    command=self.refresh_file_view).grid(column=1, row=0, sticky=(N, W, E, S))
 
-        self.settings_menu.add_command(label="Change Syncing Folder Path", command=self.change_file_folder_path)
+        # self.settings_menu.add_command(label="Change Syncing Folder Path", command=self.change_file_folder_path)
 
-        self.menu_bar.add_cascade(label="Settings", menu=self.settings_menu)
-        self.root.config(menu=self.menu_bar)
+        # self.menu_bar.add_cascade(label="Settings", menu=self.settings_menu)
+        # self.root.config(menu=self.menu_bar)
 
         ttk.Label(self.mainframe, textvariable=self.sync_dir).grid(column=0, row=0, sticky=(N, W, E, S))
 
