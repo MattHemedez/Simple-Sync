@@ -28,9 +28,10 @@ class SimplySyncGui:
         # self.sync_handler = "Testing. Delete this when done."
 
         self.root = Tk()
-        # self.style = ttk.Style()
-        # print(self.style.theme_names())
-        # self.style.theme_use("xpnative")
+        self.style = ttk.Style()
+        print(self.style.theme_names())
+        print(self.style.theme_use())
+        self.style.theme_use("vista")
 
         # Images
         self.img_reload_btn = path_str_to_photo_image("res/reload.png")
@@ -102,8 +103,14 @@ class SimplySyncGui:
         self.mainframe.rowconfigure(2, weight=1)
 
         # Style Section
-        ttk.Style().configure("UploadButton.TButton", background="#72DDF7")
-        ttk.Style().configure("DownloadButton.TButton", background="#C33C54")
+        self.style.configure("UploadButton.TButton",
+                             background="#72DDF7",
+                             font=("TkDefaultFont", "12", "bold"),
+                             foreground="white")
+        self.style.configure("DownloadButton.TButton",
+                             background="#C33C54",
+                             font=("TkDefaultFont", "12", "bold"),
+                             foreground="white")
 
         # tk Objects Initialization
         file_view_frame = Frame(self.mainframe)
@@ -111,6 +118,9 @@ class SimplySyncGui:
 
         vsb = ttk.Scrollbar(file_view_frame)
         vsb.pack(side="right", fill="y")
+
+        hsb = ttk.Scrollbar(file_view_frame, orient="horizontal")
+        hsb.pack(side="bottom", fill="x")
 
         all_columns = ("Type", "Date modified", "Size", "Path")
         columns_to_display = all_columns[0:3]
@@ -120,10 +130,12 @@ class SimplySyncGui:
                                       displaycolumns=columns_to_display,
                                       padding=[3, 3, 3, 3],
                                       selectmode="extended",
-                                      yscrollcommand=vsb.set)
+                                      yscrollcommand=vsb.set,
+                                      xscrollcommand=hsb.set)
         vsb.config(command=self.file_view.yview)
+        hsb.config(command=self.file_view.xview)
         for column in columns_to_display:
-            self.file_view.column(column=column, anchor="w", stretch=True)
+            self.file_view.column(column=column, anchor="w", stretch=True, width=100)
             self.file_view.heading(column, anchor="w", text=column)
         self.file_view.column(column="#0", anchor="w", stretch=True)
         self.file_view.heading("#0", anchor="w", text="File Name")
@@ -153,7 +165,7 @@ class SimplySyncGui:
                    image=self.img_reload_btn,
                    command=self.refresh_file_view).grid(column=1, row=0, sticky=(N, W, E, S))
 
-        ttk.Label(path_config_frame, textvariable=self.sync_dir).pack(side="left", fill="y")
+        ttk.Label(path_config_frame, textvariable=self.sync_dir).pack(side="left", fill="y", padx=4)
 
 
 if __name__ == "__main__":
