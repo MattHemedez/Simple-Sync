@@ -28,6 +28,9 @@ class SimplySyncGui:
         # self.sync_handler = "Testing. Delete this when done."
 
         self.root = Tk()
+        # self.style = ttk.Style()
+        # print(self.style.theme_names())
+        # self.style.theme_use("xpnative")
 
         # Images
         self.img_reload_btn = path_str_to_photo_image("res/reload.png")
@@ -83,6 +86,7 @@ class SimplySyncGui:
         # Root Configuration
         self.root.title("Simply Sync")
         self.root.iconbitmap(IMG_DIR / "simply_sync.ico")
+        self.root.geometry("350x400")
 
         # Main Window Configuration
         self.mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
@@ -98,8 +102,8 @@ class SimplySyncGui:
         self.mainframe.rowconfigure(2, weight=1)
 
         # Style Section
-        ttk.Style().configure("UploadButton.TButton", relief="flat", background="#72DDF7")
-        ttk.Style().configure("DownloadButton.TButton", relief="flat", background="#C33C54")
+        ttk.Style().configure("UploadButton.TButton", background="#72DDF7")
+        ttk.Style().configure("DownloadButton.TButton", background="#C33C54")
 
         # tk Objects Initialization
         file_view_frame = Frame(self.mainframe)
@@ -136,8 +140,10 @@ class SimplySyncGui:
                    text="Download",
                    command=self.on_download_btn_click).grid(column=1, row=2, sticky=(N, W, E, S))
 
-        settings_btn_frame = Frame(self.mainframe, height=16, width=28)
-        settings_btn_frame.grid(column=1, row=0, sticky=(E, N, S))
+        path_config_frame = Frame(self.mainframe)
+        path_config_frame.grid(columnspan=2, row=0, sticky=(N, W, E, S))
+        settings_btn_frame = Frame(path_config_frame, height=16, width=28)
+        settings_btn_frame.pack(side="right", fill="y")
 
         ttk.Button(settings_btn_frame,
                    image=self.img_settings_btn,
@@ -147,7 +153,7 @@ class SimplySyncGui:
                    image=self.img_reload_btn,
                    command=self.refresh_file_view).grid(column=1, row=0, sticky=(N, W, E, S))
 
-        ttk.Label(self.mainframe, textvariable=self.sync_dir).grid(column=0, row=0, sticky=(N, W, E, S))
+        ttk.Label(path_config_frame, textvariable=self.sync_dir).pack(side="left", fill="y")
 
 
 if __name__ == "__main__":
