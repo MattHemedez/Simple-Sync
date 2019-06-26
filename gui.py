@@ -111,6 +111,8 @@ class SimplySyncGui:
                              background="#C33C54",
                              font=("TkDefaultFont", "12", "bold"),
                              foreground="white")
+        self.style.configure("Treeview",
+                             colwidth=10)
 
         # tk Objects Initialization
         file_view_frame = Frame(self.mainframe)
@@ -139,8 +141,8 @@ class SimplySyncGui:
             self.file_view.heading(column, anchor="w", text=column)
         self.file_view.column(column="#0", anchor="w", stretch=True)
         self.file_view.heading("#0", anchor="w", text="File Name")
-        self.file_view.pack(side="left", fill="both")
-        self.file_view.tag_configure("file", background="#98FB98")
+        self.file_view.pack(side="left", fill="both", expand=True)
+        # self.file_view.tag_configure("file", background="#98FB98") # Turned all tags with file to green
         self.file_view.tag_bind("file", "<Double-Button-1>", self.on_file_double_click)
 
         ttk.Button(self.mainframe,
