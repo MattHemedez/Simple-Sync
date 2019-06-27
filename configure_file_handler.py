@@ -17,11 +17,18 @@ class ConfigurationHandler:
             self.init_conf()
 
     def init_conf(self):
-        self.conf = {"file_dir_path": Path("files/").resolve()}
+        self.conf = {"file_dir_path": str(Path("files/").resolve())}
         self.save_conf()
 
     def conf_file_exists(self):
-        return CONF_FILE_PATH.exists()
+        try:
+            if CONF_FILE_PATH.exists():
+                conf_file = open(CONF_FILE_PATH, "r")
+                json.load(conf_file)
+            else:
+                return False
+        except:
+            return False
 
     def get_conf_entry(self, key):
         return self.conf[key]

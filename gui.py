@@ -73,15 +73,19 @@ class SimplySyncGui:
 
     def refresh_file_view(self):
         self.file_view.delete(*self.file_view.get_children())
-        for file_path in Path(self.sync_dir.get()).iterdir():
-            file_name = file_path.name
-            self.file_view.insert("", "end", file_name,
-                                  tags=("file"),
-                                  text=file_name,
-                                  values=(file_path.suffix[1:],
-                                          ctime(file_path.stat().st_mtime),
-                                          convert_b_to_kb_str(file_path.stat().st_size),
-                                          file_path))
+        file_dir_path = Path(self.sync_dir.get())
+        if file_dir_path.exists():
+            for file_path in file_dir_path.iterdir():
+                file_name = file_path.name
+                self.file_view.insert("", "end", file_name,
+                                      tags=("file"),
+                                      text=file_name,
+                                      values=(file_path.suffix[1:],
+                                              ctime(file_path.stat().st_mtime),
+                                              convert_b_to_kb_str(file_path.stat().st_size),
+                                              file_path))
+        else:
+            self.change_file_folder_path()
 
     def init_gui_elements(self):
         # Root Configuration
